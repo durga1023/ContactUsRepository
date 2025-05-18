@@ -6,6 +6,7 @@ namespace WebApplication4.Controllers
     using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
+    using System.Threading.Tasks;
     using WebApplication4.Models;
     using WebApplication4.Repositories;
 
@@ -21,15 +22,15 @@ namespace WebApplication4.Controllers
         [HttpGet]
         public IActionResult Contact()
         {
-            return View(new Contact());
+            return View(new ContactViewModel());
         }
 
         [EnableRateLimiting("ContactFormPolicy")]
         [HttpPost]
-        public IActionResult Submit(Contact model)
+        public async Task<IActionResult> SubmitAsync(ContactViewModel model)
         {
             // Verify reCAPTCHA
-            if (string.IsNullOrEmpty(model.RecaptchaToken) || !VerifyRecaptcha(model.RecaptchaToken))
+            if (string.IsNullOrEmpty(model.RecaptchaToken) || !await VerifyRecaptchaAsync(model.RecaptchaToken))
             {
                 ViewBag.Error = $"reCAPTCHA validation failed.";                
                 return View("Contact", model);
@@ -42,12 +43,15 @@ namespace WebApplication4.Controllers
              );
 
             ViewBag.Message = $"Thank you, {model.FirstName} {model.LastName}. Your message has been received.";
-            return View("Contact", new Contact());
+            return View("Contact", new ContactViewModel());
         }
 
-        private bool VerifyRecaptcha(string token)
+        private async Task<bool> VerifyRecaptchaAsync(string token)
         {
-            var secretKey = "6Lf7dT4rAAAAAEqzKYqVQ6iW3c2-C96zGZU1z5mb";
+            var secretJson = await AwsSecretsHelper.GetSecretAsync("contactformcredentials");
+            var secretData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(secretJson);
+            var secretKey = secretData["SECRET_KEY"];
+
             if (string.IsNullOrEmpty(secretKey))
             {
                 throw new InvalidOperationException("Recaptcha secret key is not configured.");
