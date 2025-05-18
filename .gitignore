@@ -52,3 +52,12 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Manual gitignore attributes
+bin/
+obj/
+*.user
+*.suo
+*.vs/
+appsettings.Development.json
+appsettings.Local.json
