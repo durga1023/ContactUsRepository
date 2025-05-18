@@ -1,0 +1,74 @@
+﻿@model Contact
+@{
+    ViewData["Title"] = "Contact";
+}
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Message
+    </div>
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Contact Us</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Submit" method="post">
+                        <div class="mb-3">
+                            <label for="FirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="FirstName" name="FirstName" value="@Model.FirstName" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="LastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="LastName" name="LastName" value="@Model.LastName" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="Phone" name="Phone" value="@Model.Phone" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Zip" class="form-label">Zip</label>
+                            <input type="text" class="form-control" id="Zip" name="Zip" value="@Model.Zip" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="City" class="form-label">City</label>
+                            <input type="text" class="form-control" id="City" name="City" value="@Model.City" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="State" class="form-label">State</label>
+                            <input type="text" class="form-control" id="State" name="State" value="@Model.State" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Comments" class="form-label">Comments</label>
+                            <textarea class="form-control" id="Comments" name="Comments" rows="3">@Model.Comments</textarea>
+                        </div>
+                        <div><input type="hidden" id="RecaptchaToken" name="RecaptchaToken" value="@Model.RecaptchaToken" /></div>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js?render=6Lf7dT4rAAAAAD74YKBBh1ADKItZoFbUe8hNevCj"></script>
+<script>
+    grecaptcha.ready(function() {
+        grecaptcha.execute('6Lf7dT4rAAAAAD74YKBBh1ADKItZoFbUe8hNevCj', { action: 'submit' }).then(function(token) {
+            document.getElementById('RecaptchaToken').value = token;
+        });
+    });
+</script>
