@@ -3,6 +3,7 @@
 namespace WebApplication4.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
     using WebApplication4.Models;
@@ -23,6 +24,7 @@ namespace WebApplication4.Controllers
             return View(new Contact());
         }
 
+        [EnableRateLimiting("ContactFormPolicy")]
         [HttpPost]
         public IActionResult Submit(Contact model)
         {
@@ -36,7 +38,7 @@ namespace WebApplication4.Controllers
             // Save to database 
             _repository.InsertContactForm(
                  model.FirstName, model.LastName, model.Email, model.Phone,
-                 model.Zip, model.City, model.State, model.Comments,model.
+                 model.Zip, model.City, model.State, model.Comments,model.CreatedAt
              );
 
             ViewBag.Message = $"Thank you, {model.FirstName} {model.LastName}. Your message has been received.";
