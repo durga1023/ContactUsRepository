@@ -26,38 +26,46 @@
                         <div class="mb-3">
                             <label for="FirstName" class="form-label">First Name</label>
                             <input type="text" class="form-control" id="FirstName" name="FirstName" value="@Model.FirstName" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="LastName" class="form-label">Last Name</label>
                             <input type="text" class="form-control" id="LastName" name="LastName" value="@Model.LastName" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="Email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="Phone" class="form-label">Phone</label>
                             <input type="text" class="form-control" id="Phone" name="Phone" value="@Model.Phone" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="Zip" class="form-label">Zip</label>
                             <input type="text" class="form-control" id="Zip" name="Zip" value="@Model.Zip" />
+                            <span asp-validation-for="Zip" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="City" class="form-label">City</label>
                             <input type="text" class="form-control" id="City" name="City" value="@Model.City" />
+                            <span asp-validation-for="City" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="State" class="form-label">State</label>
                             <input type="text" class="form-control" id="State" name="State" value="@Model.State" />
+                            <span asp-validation-for="State" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label for="Comments" class="form-label">Comments</label>
                             <textarea class="form-control" id="Comments" name="Comments" rows="3">@Model.Comments</textarea>
+                            <span asp-validation-for="Comments" class="text-danger"></span>
                         </div>
-                        <div>
-                            <input type="hidden" id="RecaptchaToken" name="RecaptchaToken" value="@Model.RecaptchaToken" />
-                        </div>
+
+                        <input type="hidden" id="RecaptchaToken" name="RecaptchaToken" value="@Model.RecaptchaToken" />
+
                         <button type="submit" class="btn btn-primary w-100">Submit</button>
                     </form>
                 </div>
@@ -66,11 +74,15 @@
     </div>
 </div>
 
-<script src="https://www.google.com/recaptcha/api.js?render=6Ld2Rj8rAAAAAJa0gBcB3OlxtbfH4ifVqZSSGyeq"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=6Lf7dT4rAAAAAD74YKBBh1ADKItZoFbUe8hNevCj"></script>
 <script>
     grecaptcha.ready(function() {
-        grecaptcha.execute('6Ld2Rj8rAAAAAJa0gBcB3OlxtbfH4ifVqZSSGyeq', { action: 'submit' }).then(function(token) {
+        grecaptcha.execute('6Lf7dT4rAAAAAD74YKBBh1ADKItZoFbUe8hNevCj', { action: 'submit' }).then(function(token) {
             document.getElementById('RecaptchaToken').value = token;
         });
     });
 </script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace WebApplication4.Controllers
+namespace ContactApplication.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
     using System.Threading.Tasks;
-    using WebApplication4.Models;
-    using WebApplication4.Repositories;
+    using ContactApplication.Models;
+    using ContactApplication.Repositories;
 
     public class ContactController : Controller
     {
@@ -29,6 +29,10 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmitAsync(ContactViewModel model)
         {
+            if (!ModelState.IsValid) 
+            {
+                return View("Contact", model);
+            }
             // Verify reCAPTCHA
             if (string.IsNullOrEmpty(model.RecaptchaToken) || !await VerifyRecaptchaAsync(model.RecaptchaToken))
             {
@@ -46,7 +50,7 @@ namespace WebApplication4.Controllers
             return View("Contact", new ContactViewModel());
         }
 
-        private async Task<bool> VerifyRecaptchaAsync(string token)
+        public async Task<bool> VerifyRecaptchaAsync(string token)
         {
             var secretJson = await AwsSecretsHelper.GetSecretAsync("contactformcredentials");
             var secretData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(secretJson);

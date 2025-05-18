@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication4.Models;
+using ContactApplication.Models;
 
 namespace WebApplication4.Controllers
 {

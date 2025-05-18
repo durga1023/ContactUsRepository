@@ -1,7 +1,7 @@
 ﻿using ContactApplication.Repositories;
 using ContactApplication.Repositories.DataObjects;
 
-namespace WebApplication4.Repositories
+namespace ContactApplication.Repositories
 {
     public class ContactFormRepository
     {
