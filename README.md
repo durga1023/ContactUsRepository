@@ -1,71 +1,167 @@
-# .NET 8 MVC Contact Application
 
-## Overview
+# Contact Form Web Application
 
-This project is a migration of the original ASP.NET WebForms “Contact Us” application into a modern .NET 8 MVC architecture. It retains the core functionality including Google reCAPTCHA v3 validation, contact form submissions, and database logging while improving structure, security, and scalability.
+This is a  ASP.NET Core MVC web application featuring client/server-side validation, Google reCAPTCHA v3 integration, AWS deployment with RDS and Elastic Beanstalk, secure secrets handling via AWS Secrets Manager, and rate-limiting protection.
 
-### MVC Architecture
-- Migrated from WebForms to a clean Model-View-Controller structure.
-- Used Razor views for UI, Controllers for logic, and Models for data representation.
-- Ensured separation of concerns with repository and service layers.
+---
 
-### Google reCAPTCHA v3 Integration
-- Client-side integration using JavaScript from the reCAPTCHA Admin Console (https://www.google.com/recaptcha/admin).
-- 
-- 
+## Architecture Overview
 
-### AWS RDS and Secrets Manager
-- AWS RDS used for secure, scalable database management.
-- Database credentials and sensitive keys are not hard-coded, fetched securely from AWS Secrets Manager using the AWS SDK.
+### MVC Design Pattern
+- **Model**: `ContactViewModel.cs` defines the form structure and validation rules.
+- **View**: `Contact.cshtml` renders the form and integrates client-side validation and reCAPTCHA.
+- **Controller**: `ContactController.cs` handles GET/POST requests, performs model validation, and handles logic.
 
-### Security Enhancements
-- Validated all inputs on both client (HTML5 and JavaScript) and server (DataAnnotations and custom validators).
-- Implemented output sanitization to prevent XSS attacks.
-- HTTPS redirection enabled and detailed error responses disabled in production.
-- CSRF protection implemented using AntiForgery tokens.
 
-### Rate Limiting
-- Middleware-based rate limiting using AspNetCoreRateLimit to prevent abuse and brute-force attempts.
-- Configurable via appsettings.json.
 
-### Logging with log4net
-- Extended log4net configuration to include error, warning, and usage logs.
-- Logs are stored in local files and can be extended for cloud storage.
+## Validation Strategy
 
-## Validation and Testing
+**Client-Side** : Model annotations enforce rules like `Required`, `EmailAddress`, etc.
 
-- Client-side: HTML5 required fields, input patterns, and reCAPTCHA token handling.
-- Server-side: ModelState validation, custom model binding, and error messaging.
-- Unit testing implemented using xUnit.
+**Server-Side** : Checked using `ModelState.IsValid`and Google reCAPTCHA v3 validation to assess request legitimacy via score threshold.
+
+
+## Google reCAPTCHA v3 Integration
+
+### Implementation
+
+- On page load, the frontend generates a reCAPTCHA token using the configured site key.
+- The token is included as a hidden input in the form and submitted with the user's input.
+- On the server, the `ContactController` sends the token and secret key to the Google API for validation.
+- The returned score is evaluated:
+- If the score is **greater than or equal to 0.5**, the request is considered valid.
+- If the score is **below 0.5**, the request is rejected with a user-friendly error message.
+- Both the **site key** and **secret key** are securely stored in **AWS Secrets Manager** and retrieved at runtime using the `AwsSecretsHelper` class.
+
+### Benefits
+
+- Fully transparent to users with no interruption or additional input required.
+- Significantly reduces bot submissions and spam without degrading the user experience.
+- Enables flexible handling of suspicious requests based on scoring thresholds.
+
+- **Verification Result Logging**: via log4net
+
+
+## Rate Limiting
+
+Rate limiting is implemented to prevent abuse of the contact form by limiting how many times a user can submit data within a short time frame.
+
+### Implementation
+
+This application uses the built-in **ASP.NET Core Rate Limiting API** (available in .NET 8) via the `System.Threading.RateLimiting` namespace.
+
+- A custom policy named `"ContactFormPolicy"` is defined in `Program.cs`.
+- This policy restricts the number of POST requests allowed per IP within a fixed window of time.
+- The rate limiter is registered with `builder.Services.AddRateLimiter(...)`.
+- The `ContactController` POST action is decorated with `[EnableRateLimiting("ContactFormPolicy")]` to enforce the rule.
+
+### Example Use
+
+If a user exceeds the allowed number of requests (e.g., 5 per minute), they will receive a `429 Too Many Requests` HTTP response.
+
+### Benefits
+
+- Helps prevent bots or users from spamming the form.
+- Protects backend resources and ensures fair usage.
+- Works in tandem with reCAPTCHA v3 to provide layered defense.
+
+## NuGet Packages Used
+
+| Package                              | Purpose                         |
+|--------------------------------------|---------------------------------|
+| `Microsoft.AspNetCore.Mvc`           | MVC framework                   |
+| `Google.reCAPTCHA`                   | reCAPTCHA validation            |
+| `AspNetCoreRateLimit`                | Request throttling              |
+| `Amazon.SecretsManager`              | AWS Secrets retrieval           |
+| `log4net`                            | Logging system                  |
+
+
+## Database Design (SQL Server on AWS RDS)
+
+### Schema
+
+Created using SSMS after connecting to the AWS RDS SQL Server instance:
+
+```sql
+CREATE TABLE [dbo].[Contact] (
+    [Id] INT IDENTITY(1,1) PRIMARY KEY,
+    [FirstName] NVARCHAR(50) NOT NULL,
+    [LastName] NVARCHAR(50) NULL,
+    [Email] NVARCHAR(50) NOT NULL,
+    [Phone] NVARCHAR(50) NULL,
+    [Zip] NVARCHAR(20) NULL,
+    [City] NVARCHAR(30) NULL,
+    [State] NVARCHAR(30) NULL,
+    [Comments] NVARCHAR(100) NULL,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETDATE()
+);
+```
+
+### How It Was Set Up
+
+- Provisioned an RDS instance (SQL Server) using AWS Console.
+- Connected via SQL Server Management Studio (SSMS) using RDS endpoint.
+- Executed CREATE TABLE command for contact data.
+- Inbound access on port 1433 configured via security group.
+
+## AWS Configuration
+
+### Secrets Manager
+- Used for: reCAPTCHA site keys, database credentials.
+- Retrieved securely using AWS SDK in `AwsSecretsHelper.cs`.
+- Avoided hardcoded values for production deployment.
+
+### IAM Roles
+- IAM role attached to Elastic Beanstalk environment provided access to Secrets Manager.
+- No access key ID or secret key used directly in code.
+
+### AWS Toolkit (Visual Studio)
+- Used only for publishing the application to Elastic Beanstalk.
+- Environment variables configured via AWS Elastic Beanstalk console or deployment settings.
+
 
 ## Deployment
 
+- Application deployed via AWS Elastic Beanstalk using Visual Studio's AWS Toolkit.
+- .NET Core environment selected with proper appsettings and environment variables.
+
+**Live Deployment**:  
+http://contactapp-dev.eba-vdppmvkd.us-east-2.elasticbeanstalk.com/
 
 
 
 
-## Screenshots
+## Unit Testing
 
-### User Interface (UI)
-The contact form UI built using Razor Views in the MVC architecture.
-
-![UI Screenshot](Screenshots/ui.png)
-
-### Application Logs
-Example of log4net logs recording submission data and errors.
+- Tests for `ContactController` validate:
+  - Form submission
+  - reCAPTCHA result handling
+  - Server-side validation logic
 
 
+## Challenges Faced
 
-### Google reCAPTCHA Dashboard
-The reCAPTCHA v3 dashboard showing score analytics and request volume from the Google Admin Console.
+- IAM Permissions: Faced deployment issues initially due to IAM role not having access to Secrets Manager.
+- reCAPTCHA Issues: Key mismatches caused loading problems until the correct environment variables were set.
+- Environment-Specific Settings: Setup required careful alignment between local appsettings and AWS configuration.
 
 
-### reCAPTCHA Error Scenario
-This screenshot captures how the application responds when reCAPTCHA validation fails. In this case, the threshold was artificially raised to 0.99 to simulate bot-like traffic.
+## Assumptions
 
-![reCAPTCHA Error at High Score](Screenshots/captcha_error_highscore.png)
+- Application is hosted in a single AWS region.
+- Only one form exists (no authentication or multiple views).
+- SSMS is available for DB admin tasks.
 
-### Post-Submission Thank You Page
-A confirmation view that users see upon successfully submitting the contact form.
 
-![Thank You Page](Screenshots/thankyou.png)
+## Architectural Decisions
+
+- ASP.NET Core MVC used for structure and testability.
+- AWS RDS used for managed DB hosting.
+- Secrets Manager and IAM roles chosen for security.
+
+
+## Improvements Recommended
+
+- Add confirmation emails to submitter/admin.
+- Integrate Entity Framework Core for database operations.
+- Add CI/CD using GitHub Actions and AWS CLI.
