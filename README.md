@@ -23,7 +23,9 @@ The application enforces validation at two levels to ensure data integrity and s
 Client-side validation is implemented using **data annotations** in the `ContactViewModel.cs` file. Attributes like `[Required]`, `[EmailAddress]`, and `[StringLength]` are applied to input fields.
 - **Example**:  
   If a user tries to submit the form without entering required fields, validation messages like **“First Name is required”** or **“Email is required”** will be displayed immediately, without a page reload.
+  
 ![Client-side Validation](Screenshots/form_validation.png)
+
 This provides a smooth user experience by preventing submission of invalid forms on the client side.
 
 ### Server-Side Validation
