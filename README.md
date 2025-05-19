@@ -36,7 +36,7 @@ Server-side validation is essential for security, ensuring no invalid data is pr
 - Also includes **Google reCAPTCHA v3 score validation**.
 - **Example**:  
   After form submission, the reCAPTCHA token is sent to Google’s API. If the returned score is less than `0.5`, the request is rejected.  
-  In testing, if we **force the threshold to `0.99`**, valid users may receive an error message like:  
+  In testing, if  **the threshold is forced to `0.99`**, valid users may receive an error message like:  
   **“reCAPTCHA validation failed”**
   
 ![Server-side reCAPTCHA Validation](Screenshots/recaptcha_low_score.png)
