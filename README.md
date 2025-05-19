@@ -16,9 +16,30 @@ This is a  ASP.NET Core MVC web application featuring client/server-side validat
 
 ## Validation Strategy
 
-**Client-Side** : Model annotations enforce rules like `Required`, `EmailAddress`, etc.
+The application enforces validation at two levels to ensure data integrity and security: **client-side** and **server-side**.
 
-**Server-Side** : Checked using `ModelState.IsValid`and Google reCAPTCHA v3 validation to assess request legitimacy via score threshold.
+### Client-Side Validation
+
+Client-side validation is implemented using **data annotations** in the `ContactViewModel.cs` file. Attributes like `[Required]`, `[EmailAddress]`, and `[StringLength]` are applied to input fields.
+- **Example**:  
+  If a user tries to submit the form without entering required fields, validation messages like **“First Name is required”** or **“Email is required”** will be displayed immediately, without a page reload.
+![Client-side Validation](Screenshots/form_validation.png)
+This provides a smooth user experience by preventing submission of invalid forms on the client side.
+
+### Server-Side Validation
+
+Server-side validation is essential for security, ensuring no invalid data is processed even if client-side checks are bypassed.
+
+- Implemented by checking `ModelState.IsValid` in the `ContactController`'s POST action.
+- Also includes **Google reCAPTCHA v3 score validation**.
+- **Example**:  
+  After form submission, the reCAPTCHA token is sent to Google’s API. If the returned score is less than `0.5`, the request is rejected.  
+  In testing, if we **force the threshold to `0.99`**, valid users may receive an error message like:  
+  **“reCAPTCHA validation failed”**
+  
+![Server-side reCAPTCHA Validation](Screenshots/recaptcha_low_score.png)
+
+This dual-layered validation approach ensures both user-friendliness and protection against automated bots or malicious inputs.
 
 
 ## Google reCAPTCHA v3 Integration
@@ -186,8 +207,8 @@ Details the configuration of the RDS SQL Server instance, such as engine type, e
 ## Assumptions
 
 - Application is hosted in a single AWS region.
-- Only one form exists (no authentication or multiple views).
 - SSMS is available for DB admin tasks.
+- The application is hosted in AWS using Elastic Beanstalk with single instance. It can be adjusted to use load balancer looking at the traffic it’s receiving.
 
 
 ## Architectural Decisions
@@ -199,6 +220,6 @@ Details the configuration of the RDS SQL Server instance, such as engine type, e
 
 ## Improvements Recommended
 
-- Add confirmation emails to submitter/admin.
-- Integrate Entity Framework Core for database operations.
-- Add CI/CD using GitHub Actions and AWS CLI.
+- The server logs written using log4net can be fed to AWS cloud watch
+- Cloudformation templates for the AwS resources used.
+- Load secret manager details to cache once the program is loading .. once the program loads query the cache instead of calling secrets manager each time 
