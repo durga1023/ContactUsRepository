@@ -2,16 +2,18 @@
 
 namespace ContactApplication.Controllers
 {
+    using ContactApplication.Models;
+    using ContactApplication.Repositories;
+    using log4net;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
     using System.Threading.Tasks;
-    using ContactApplication.Models;
-    using ContactApplication.Repositories;
 
     public class ContactController : Controller
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(ContactController));
         private readonly ContactFormRepository _repository;
 
         public ContactController(ContactFormRepository repository)
@@ -22,6 +24,7 @@ namespace ContactApplication.Controllers
         [HttpGet]
         public IActionResult Contact()
         {
+            log.Info("Contact called (GET)");
             return View(new ContactViewModel());
         }
 
@@ -29,13 +32,16 @@ namespace ContactApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmitAsync(ContactViewModel model)
         {
+            log.Info("Submit called with contact form data(POST)");
             if (!ModelState.IsValid) 
             {
+                log.Warn("Contact form submission failed validation.");
                 return View("Contact", model);
             }
             // Verify reCAPTCHA
             if (string.IsNullOrEmpty(model.RecaptchaToken) || !await VerifyRecaptchaAsync(model.RecaptchaToken))
             {
+                log.Error("Recaptcha token is missing.");
                 ViewBag.Error = $"reCAPTCHA validation failed.";                
                 return View("Contact", model);
             }
@@ -52,36 +58,48 @@ namespace ContactApplication.Controllers
 
         public async Task<bool> VerifyRecaptchaAsync(string token)
         {
-            var secretJson = await AwsSecretsHelper.GetSecretAsync("contactformcredentials");
-            var secretData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(secretJson);
-            var secretKey = secretData["SECRET_KEY"];
+            var secretKey = await AwsSecretsHelper.GetSecretValueAsync("contactformcredentials", "us-east-2", "SECRET_KEY");
 
             if (string.IsNullOrEmpty(secretKey))
             {
                 throw new InvalidOperationException("Recaptcha secret key is not configured.");
             }
-
-            var client = new HttpClient();
-            var response = client.PostAsync("https://www.google.com/recaptcha/api/siteverify",
-                new FormUrlEncodedContent(new Dictionary<string, string>
-                {
+            try
+            {
+                var client = new HttpClient();
+                var response = client.PostAsync("https://www.google.com/recaptcha/api/siteverify",
+                    new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
                     { "secret", secretKey },
                     { "response", token }
-                })).Result;
+                    })).Result;
 
-            var result = response.Content.ReadAsStringAsync().Result;
-            if (string.IsNullOrEmpty(result))
-            {
-                throw new InvalidOperationException("Recaptcha verification response is null or empty.");
+                var result = response.Content.ReadAsStringAsync().Result;
+                if (string.IsNullOrEmpty(result))
+                {
+                    log.Error("Recaptcha verification response is empty.");
+                    throw new InvalidOperationException("Recaptcha verification response is null or empty.");
+                }
+
+                dynamic? json = JsonConvert.DeserializeObject(result);
+                if (json == null)
+                {
+                    log.Error("Failed to deserialize Recaptcha verification response.");
+                    throw new InvalidOperationException("Failed to deserialize Recaptcha verification response.");
+                }
+                bool success = json.success;
+                double score = json.score;
+                log.Info($"Recaptcha success: {success}, score: {score}");
+
+                return json.success == true && json.score >= 0.9;
+
+
             }
-
-            dynamic? json = JsonConvert.DeserializeObject(result);
-            if (json == null)
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to deserialize Recaptcha verification response.");
+                log.Error("Exception occurred during reCAPTCHA verification.", ex);
+                throw;
             }
-
-            return json.success == true && json.score >= 0.5;
         }
     }
 

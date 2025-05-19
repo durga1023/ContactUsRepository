@@ -1,17 +1,28 @@
 using ContactApplication.Repositories;
 using Microsoft.EntityFrameworkCore;
-using ContactApplication.Repositories;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using log4net;
+using log4net.Config;
+using System.Reflection;
+using System.Text.Json;
 
+var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+ILog log = LogManager.GetLogger(typeof(Program));
+
+XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = await AwsSecretsHelper.GetSecretValueAsync("contactformcredentials", "us-east-2", "CONNECTION_STRING");
+log.Info("Successfully fetched connection string.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ContactFormRepository>();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ContactFormDb")));
+    options.UseSqlServer(connectionString));
 // Add rate limiting
+log.Info("Configuring rate limiting policy.");
 builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy("ContactFormPolicy", context =>
@@ -20,7 +31,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 3, // Allow 5 requests
+                PermitLimit = 3, // Allow 3 requests
                 Window = TimeSpan.FromMinutes(1), // Per 1 minute
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 0
@@ -28,6 +39,19 @@ builder.Services.AddRateLimiter(options =>
 });
 var app = builder.Build();
 
+// Global exception handler
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        log.Error("Unhandled exception occurred during request processing.", ex);
+        throw;
+    }
+});
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -48,4 +72,7 @@ app.MapControllerRoute(
     pattern: "{controller=Contact}/{action=Contact}/{id?}");
 
 app.UseRateLimiter();
+
+log.Info("Application has started.");
+
 app.Run();
