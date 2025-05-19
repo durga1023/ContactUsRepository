@@ -6,6 +6,7 @@ using log4net;
 using log4net.Config;
 using System.Reflection;
 using System.Text.Json;
+using ContactApplication.Repositories.Interfaces;
 
 var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
 ILog log = LogManager.GetLogger(typeof(Program));
@@ -18,7 +19,7 @@ log.Info("Successfully fetched connection string.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<ContactFormRepository>();
+builder.Services.AddScoped<IContactFormRepository, ContactFormRepository>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 // Add rate limiting

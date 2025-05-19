@@ -1,9 +1,10 @@
 ﻿using ContactApplication.Repositories;
 using ContactApplication.Repositories.DataObjects;
+using ContactApplication.Repositories.Interfaces;
 
 namespace ContactApplication.Repositories
 {
-    public class ContactFormRepository
+    public class ContactFormRepository : IContactFormRepository
     {
         private readonly AppDbContext _context;
 

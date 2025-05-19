@@ -4,6 +4,7 @@ namespace ContactApplication.Controllers
 {
     using ContactApplication.Models;
     using ContactApplication.Repositories;
+    using ContactApplication.Repositories.Interfaces;
     using log4net;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.RateLimiting;
@@ -14,9 +15,9 @@ namespace ContactApplication.Controllers
     public class ContactController : Controller
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(ContactController));
-        private readonly ContactFormRepository _repository;
+        private readonly IContactFormRepository _repository;
 
-        public ContactController(ContactFormRepository repository)
+        public ContactController(IContactFormRepository repository)
         {
             _repository = repository;
         }
@@ -56,7 +57,7 @@ namespace ContactApplication.Controllers
             return View("Contact", new ContactViewModel());
         }
 
-        public async Task<bool> VerifyRecaptchaAsync(string token)
+        public virtual async Task<bool> VerifyRecaptchaAsync(string token)
         {
             var secretKey = await AwsSecretsHelper.GetSecretValueAsync("contactformcredentials", "us-east-2", "SECRET_KEY");
 
@@ -91,7 +92,7 @@ namespace ContactApplication.Controllers
                 double score = json.score;
                 log.Info($"Recaptcha success: {success}, score: {score}");
 
-                return json.success == true && json.score >= 0.9;
+                return json.success == true && json.score >= 0.5;
 
 
             }
