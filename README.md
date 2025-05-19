@@ -40,6 +40,23 @@ This is a  ASP.NET Core MVC web application featuring client/server-side validat
 - Enables flexible handling of suspicious requests based on scoring thresholds.
 
 - **Verification Result Logging**: via log4net
+### Google reCAPTCHA Dashboard
+
+The screenshot below illustrates real activity captured on the Google reCAPTCHA v3 dashboard after integrating it into the contact form.
+
+![reCAPTCHA Dashboard](Screenshots/recaptcha_dashboard.png)
+
+#### Key Metrics
+
+- **Total Requests:** 109
+- **Suspicious Requests:** 0% - No potentially harmful or bot-driven interactions detected.
+- **Request Volume Chart:** Displays daily traffic from May 12 to May 18, 2025, peaking around 80 requests per day.
+- **Score Distribution:**
+  - Majority of requests scored between **0.8 and 1.0**, indicating legitimate human activity.
+  - No significant volume in low-score ranges (below 0.5), confirming the effectiveness of frontend validation.
+- **Top Actions / Suspicious Traffic:** No specific suspicious actions were recorded, further validating the robustness of form design.
+
+These metrics confirm that reCAPTCHA is functioning effectively in background mode, filtering requests based on user behavior without impacting the user experience.
 
 
 ## Rate Limiting
@@ -119,6 +136,12 @@ CREATE TABLE [dbo].[Contact] (
 - Used only for publishing the application to Elastic Beanstalk.
 - Environment variables configured via AWS Elastic Beanstalk console or deployment settings.
 
+## Unit Testing
+
+- Tests for `ContactController` validate:
+  - Form submission
+  - reCAPTCHA result handling
+  - Server-side validation logic
 
 ## Deployment
 
@@ -128,15 +151,29 @@ CREATE TABLE [dbo].[Contact] (
 **Live Deployment**:  
 http://contactapp-dev.eba-vdppmvkd.us-east-2.elasticbeanstalk.com/
 
+### Elastic Beanstalk Deployment
+
+Shows the deployed environment in AWS Elastic Beanstalk including health status and app URL.
+
+![Elastic Beanstalk Deployment](Screenshots/aws_eb_deploy.png)
+
+---
+
+### SSMS Connected to AWS RDS
+
+Displays the SQL Server Management Studio (SSMS) connected to the RDS instance and the `Contact` table.
+
+![SSMS Connection](Screenshots/ssms_connection.png)
+
+---
+
+### AWS RDS Instance Configuration
+
+Details the configuration of the RDS SQL Server instance, such as engine type, endpoint, port, and access settings.
+
+![RDS Configuration](Screenshots/aws_rds_config.png)
 
 
-
-## Unit Testing
-
-- Tests for `ContactController` validate:
-  - Form submission
-  - reCAPTCHA result handling
-  - Server-side validation logic
 
 
 ## Challenges Faced
