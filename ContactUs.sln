@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactApplication", "Conta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactAppTests", "..\TestProject1\ContactAppTests.csproj", "{A9802B49-0418-41BF-939B-9E66513663E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactApplicationTests", "..\ContactApplicationTests\ContactApplicationTests.csproj", "{1E876387-67F8-3297-9E85-96E6ACEACDB2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lnAssessment", "lnAssessment", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,13 +23,13 @@ Global
 		{A9802B49-0418-41BF-939B-9E66513663E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9802B49-0418-41BF-939B-9E66513663E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9802B49-0418-41BF-939B-9E66513663E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1E876387-67F8-3297-9E85-96E6ACEACDB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1E876387-67F8-3297-9E85-96E6ACEACDB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E876387-67F8-3297-9E85-96E6ACEACDB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E876387-67F8-3297-9E85-96E6ACEACDB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{90B7A1B7-34D1-4454-BC55-DF5E5F7DBD16} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A9802B49-0418-41BF-939B-9E66513663E5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {124A7889-F248-4428-96E4-1889F574BE31}
