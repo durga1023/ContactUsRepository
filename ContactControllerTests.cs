@@ -3,6 +3,7 @@ using ContactApplication.Models;
 using ContactApplication.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Xunit;
 
 namespace TestProject1
 {
